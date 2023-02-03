@@ -10,4 +10,4 @@ The challenge is make sure when you run `bundle exec rspec`, all result is green
 
 
 # This is the Test result
-![alt text](https://github.com/Virtuozs/blob/messenger-api/test.png?raw=true)
+![Screenshot](screenshot.png)
