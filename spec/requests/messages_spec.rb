@@ -3,16 +3,23 @@ require 'rails_helper'
 RSpec.describe 'Messages API', type: :request do
   let(:agus) { create(:user) }
   let(:dimas) { create(:user) }
-  let(:dimas_headers) { valid_headers(dimas) }
+  let(:dimas_headers) { valid_headers(dimas.id) }
 
   let(:samid) { create(:user) }
-  let(:samid_headers) { valid_headers(samid) }
+  let(:samid_headers) { valid_headers(samid.id) }
 
   # TODO: create conversation between Dimas and Agus, then set convo_id variable
+  let(:conversation_data) {create(:conversation, sender: dimas, recipient: agus)}
+  let(:messages_data) {create_list(:user_message, 3, conversation: conversation_data, sender: conversation_data.sender)}
+  let(:convo_id) {conversation_data.id}
 
   describe 'get list of messages' do
     context 'when user have conversation with other user' do
-      before { get "/conversations/#{convo_id}/messages", params: {}, headers: dimas_headers }
+      before do
+        conversation_data
+        messages_data
+        get "/conversations/#{convo_id}/messages", params: {}, headers: dimas_headers
+      end 
 
       it 'returns list all messages in conversation' do
         expect_response(
@@ -34,7 +41,11 @@ RSpec.describe 'Messages API', type: :request do
 
     context 'when user try to access conversation not belong to him' do
       # TODO: create conversation and set convo_id variable
-      before { get "/conversations/#{convo_id}/messages", params: {}, headers: samid_headers }
+      before do 
+        conversation_data
+        messages_data
+        get "/conversations/#{convo_id}/messages", params: {}, headers: samid_headers
+      end 
 
       it 'returns error 403' do
         expect(response).to have_http_status(403)
@@ -53,7 +64,7 @@ RSpec.describe 'Messages API', type: :request do
 
   describe 'send message' do
     let(:valid_attributes) do
-      { message: 'Hi there!', user_id: agus.id }
+      { message: 'Hi there', user_id: agus.id }
     end
 
     let(:invalid_attributes) do
@@ -61,7 +72,7 @@ RSpec.describe 'Messages API', type: :request do
     end
 
     context 'when request attributes are valid' do
-      before { post "/messages", params: valid_attributes, headers: dimas_headers}
+      before { post "/messages", params: valid_attributes.to_json, headers: dimas_headers}
 
       it 'returns status code 201 (created) and create conversation automatically' do
         expect_response(
@@ -88,7 +99,7 @@ RSpec.describe 'Messages API', type: :request do
     end
 
     context 'when create message into existing conversation' do
-      before { post "/messages", params: valid_attributes, headers: dimas_headers}
+      before { post "/messages", params: valid_attributes.to_json, headers: dimas_headers}
 
       it 'returns status code 201 (created) and create conversation automatically' do
         expect_response(
@@ -115,7 +126,7 @@ RSpec.describe 'Messages API', type: :request do
     end
 
     context 'when an invalid request' do
-      before { post "/messages", params: invalid_attributes, headers: dimas_headers}
+      before { post "/messages", params: invalid_attributes.to_json, headers: dimas_headers}
 
       it 'returns status code 422' do
         expect(response).to have_http_status(422)

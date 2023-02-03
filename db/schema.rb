@@ -20,17 +20,16 @@ ActiveRecord::Schema.define(version: 2023_02_01_125051) do
     t.integer "recipient_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["sender_id"], name: "index_conversations_on_sender_id"
   end
 
   create_table "user_messages", force: :cascade do |t|
     t.integer "conversation_id"
     t.integer "sender_id"
     t.text "body"
+    t.datetime "read_at"
+    t.datetime "send_at", default: -> { "CURRENT_TIMESTAMP" }
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["conversation_id"], name: "index_messages_on_conversation_id"
-    t.index ["sender_id"], name: "index_messages_on_sender_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -40,11 +39,6 @@ ActiveRecord::Schema.define(version: 2023_02_01_125051) do
     t.string "photo_url"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["email"], name: "index_users_on_email", unique: true
   end
 
-  add_foreign_key "conversations", "users", column: "recipient_id"
-  add_foreign_key "conversations", "users", column: "sender_id"
-  add_foreign_key "user_messages", "conversations"
-  add_foreign_key "user_messages", "users", column: "sender_id"
 end
