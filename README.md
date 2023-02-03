@@ -10,4 +10,4 @@ The challenge is make sure when you run `bundle exec rspec`, all result is green
 
 
 # This is the Test result
-![Screenshot](screenshot.png)
+![Screenshot](test.png)
